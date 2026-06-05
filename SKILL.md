@@ -85,7 +85,7 @@ DRAFT_ROOT=$("$CJ/.venv/bin/python" "$CJ/scripts/capcut_paths.py" | python3 -c "
   --filter "书意" --filter-intensity 40 --intro "渐显" \
   --width 1080 --height 1920 --fps 30 --allow-replace
 ```
-归档（NAS 项目根命名 `日期_客户_项目`）：
+归档（NAS 项目根命名 `日期_客户_项目`）。**NAS 可达就直传；不可达(外地/断网/没连VPN)自动入队，下次补传——断网不丢**：
 ```bash
 bash "$SK/scripts/archive_to_nas.sh" \
   "/Volumes/团队共享盘/01_项目进行中/2026/2026-06_客户_项目" \
@@ -94,6 +94,16 @@ bash "$SK/scripts/archive_to_nas.sh" \
   "$WORK/字幕.srt" "$WORK/frames/final.jpg" \
   "$DRAFT_ROOT/项目名_高级感"
 ```
+底层是 `scripts/nas_sync.py`（archive/flush/status），归档后顺带 flush 一次历史队列。
+
+## 在外地 / 断网也能用（随时随地剪 + 自动归档 + 断网不丢）
+
+**关键事实**：第 1-5 步全是本地计算，**剪辑本身在任何地方都能跑，零依赖 NAS**。只有第 6 步归档碰 NAS。
+
+- **断网不丢**：NAS 不可达时 `archive_to_nas.sh` 自动把成片/字幕/草稿暂存到 `~/.nas-autoclip-queue/` + 清单；NAS 再次可达时跑 `python3 "$SK/scripts/nas_sync.py" flush` 自动补传。`status` 看待同步项。
+- **全自动补传**（可选）：`bash "$SK/scripts/install_autoflush.sh"` 装一个 launchd 代理，每 30 分钟自动 flush 一次——回家/连上 VPN 后无需手动。卸载加 `--uninstall`。
+- **远程让 NAS 可达**（让外地=局域网）：首选 **Tailscale**（NAS+电脑各装一个组私有网，挂载 `smb://<tailscale-ip>` 后 `/Volumes/<share>` 照常在，skill 零改动）；次选群晖 Drive 客户端同步盘 / VPN Server。
+- 强制离线测试：归档命令前加 `NAS_AUTOCLIP_FORCE_OFFLINE=1` 即可模拟断网走入队分支。
 
 ## 完成后必须对用户讲清的边界
 

@@ -38,7 +38,9 @@
 | `scripts/transcribe.sh` | whisper 中文转写，内置「代理截断模型」自愈（直连重下） |
 | `scripts/keyframe_grid.sh` | 抽帧成联系表，供 agent 看画面选段 |
 | `scripts/probe_folder.sh` | 扫描文件夹内视频的画幅/时长 |
-| `scripts/archive_to_nas.sh` | 按团队 00-05 结构归档到 NAS |
+| `scripts/archive_to_nas.sh` | 按团队 00-05 结构归档到 NAS（薄壳，转发到 nas_sync.py） |
+| `scripts/nas_sync.py` | **断网不丢**归档器：NAS 可达直传，不可达入队，`flush` 自动补传 |
+| `scripts/install_autoflush.sh` | 装 launchd 代理，每 30 分钟自动 flush 队列（回家/连 VPN 后无感补传） |
 
 完整流程与避坑见 [`SKILL.md`](SKILL.md) 与 [`references/recipes-and-pitfalls.md`](references/recipes-and-pitfalls.md)。
 
