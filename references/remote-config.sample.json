@@ -1,0 +1,8 @@
+{
+  "_说明": "把本文件复制到 ~/.nas-autoclip-remote.json 并填好，即可在外地用 WebDAV 实时把成片传回 NAS（无需 VPN）。建议 chmod 600。凭据只在你本地读取，不外传。",
+  "_一次性前置": "NAS 套件中心装『WebDAV Server』→ 启用 HTTPS(端口 5006)；路由器把 5006 端口转发到 NAS，或用群晖 DDNS/QuickConnect 暴露一个可达地址。",
+  "webdav_base": "https://你的DDNS地址或公网IP:5006/团队共享盘",
+  "user": "MING",
+  "pass": "你的NAS密码",
+  "insecure": true
+}

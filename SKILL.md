@@ -100,10 +100,15 @@ bash "$SK/scripts/archive_to_nas.sh" \
 
 **关键事实**：第 1-5 步全是本地计算，**剪辑本身在任何地方都能跑，零依赖 NAS**。只有第 6 步归档碰 NAS。
 
-- **断网不丢**：NAS 不可达时 `archive_to_nas.sh` 自动把成片/字幕/草稿暂存到 `~/.nas-autoclip-queue/` + 清单；NAS 再次可达时跑 `python3 "$SK/scripts/nas_sync.py" flush` 自动补传。`status` 看待同步项。
-- **全自动补传**（可选）：`bash "$SK/scripts/install_autoflush.sh"` 装一个 launchd 代理，每 30 分钟自动 flush 一次——回家/连上 VPN 后无需手动。卸载加 `--uninstall`。
-- **远程让 NAS 可达**（让外地=局域网）：首选 **Tailscale**（NAS+电脑各装一个组私有网，挂载 `smb://<tailscale-ip>` 后 `/Volumes/<share>` 照常在，skill 零改动）；次选群晖 Drive 客户端同步盘 / VPN Server。
-- 强制离线测试：归档命令前加 `NAS_AUTOCLIP_FORCE_OFFLINE=1` 即可模拟断网走入队分支。
+归档走 `nas_sync.py` 的**三层降级**，覆盖所有场景：
+1. **局域网可达** → 直接归档（最快）。
+2. **在外地 + 配了远程** → 走 **WebDAV HTTPS 实时上传**回 NAS，无需 VPN/客户端。一次性配置：NAS 装「WebDAV Server」套件开 5006，把 `references/remote-config.sample.json` 复制到 `~/.nas-autoclip-remote.json` 填好（chmod 600）。
+3. **纯断网** → 暂存 `~/.nas-autoclip-queue/` + 清单（**断网不丢**），回家/连上后自动补传。
+
+- **全自动补传**：`bash "$SK/scripts/install_autoflush.sh"` 装 launchd 代理，每 30 分钟自动 `flush`（局域网或远程恢复即补传）。卸载加 `--uninstall`。
+- `python3 "$SK/scripts/nas_sync.py" status` 看待同步项 + 远程是否在线。
+- 另可用 **Tailscale**（NAS+电脑组私有网，挂 `smb://<ts-ip>` 后 `/Volumes/<share>` 照常在，skill 零改动）替代 WebDAV——按你偏好二选一即可。
+- 强制离线测试：命令前加 `NAS_AUTOCLIP_FORCE_OFFLINE=1`。
 
 ## 完成后必须对用户讲清的边界
 
